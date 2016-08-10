@@ -1,0 +1,42 @@
+[
+    {
+    	"caption": "SurroundWith: while",
+	    "command": "surround_with",
+	    "args": { "action": "while" }
+    },
+    {
+    	"caption": "SurroundWith: for",
+	    "command": "surround_with",
+	    "args": { "action": "for" }
+    },
+    {
+    	"caption": "SurroundWith: try",
+	    "command": "surround_with",
+	    "args": { "action": "try" }
+    },
+    {
+    	"caption": "SurroundWith: dowhile",
+	    "command": "surround_with",
+	    "args": { "action": "dowhile" }
+    },
+    {
+    	"caption": "SurroundWith: if",
+	    "command": "surround_with",
+	    "args": { "action": "if" }
+    },
+    {
+    	"caption": "SurroundWith: ifelse",
+	    "command": "surround_with",
+	    "args": { "action": "ifelse" }
+    },
+    {
+    	"caption": "SurroundWith: else",
+	    "command": "surround_with",
+	    "args": { "action": "else" }
+    },
+    {
+    	"caption": "SurroundWith: div",
+	    "command": "surround_with",
+	    "args": { "action": "div" }
+    },
+]

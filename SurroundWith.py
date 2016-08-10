@@ -9,6 +9,8 @@ class SurroundWithCommand(sublime_plugin.TextCommand):
 			self.addfor()
 		elif action == 'if':
 			self.addif()
+		elif action == 'else':
+			self.addelse()
 		elif action == 'ifelse':
 			self.addifelse()
 		elif action == 'while':
@@ -23,9 +25,9 @@ class SurroundWithCommand(sublime_plugin.TextCommand):
 	def addwhile(self):
 		if self.language == "Packages/Python/Python.tmLanguage":
 			self.insertStuff("while ${1:Condition}:", "", "while :", "", "While-Loop")
-		else:			
+		else:
 			self.insertStuff("while (${1:/*Condition*/}) {", "}", "while () {", "}", "While-Loop")
-		
+
 	def addfor(self):
 		if self.language == "Packages/Python/Python.tmLanguage":
 			self.insertStuff("for ${1:/*Condition*/}:", "", "for :", "", "For-Loop")
@@ -40,12 +42,18 @@ class SurroundWithCommand(sublime_plugin.TextCommand):
 
 	def adddowhile(self):
 		self.insertStuff("do {", "} while (${1:/*Condition*/});", "do {", "} while ();", "Do-While-Loop")
-		
+
 	def addif(self):
 		if self.language == "Packages/Python/Python.tmLanguage":
 			self.insertStuff("if ${1:Condition}:", "", "if :", "", "If-Clause")
 		else:
 			self.insertStuff("if (${1:/*Condition*/}) {", "}", "if () {", "}", "If-Clause")
+
+	def addelse(self):
+		if self.language == "Packages/Python/Python.tmLanguage":
+			self.insertStuff("else:", "", "else:", "", "Else-Clause")
+		else:
+			self.insertStuff("else {", "}", "else () {", "}", "Else-Clause")
 
 	def addifelse(self):
 		if self.language == "Packages/Python/Python.tmLanguage":
@@ -62,23 +70,56 @@ class SurroundWithCommand(sublime_plugin.TextCommand):
 		nSel = 0
 		for sel in sels:
 			nSel += 1
-		
+
 		for sel in sels:
 			if sel.empty():
 				continue
-			str    	= self.view.substr(sel)
+			currStr    	= self.view.substr(sel)
+
+			if True: # enables questionable behavior
+				sel = self.view.word(sel)
+				currStr    	= self.view.substr(sel)
+				diffL = len(currStr) - len(currStr.lstrip())
+				diffR = len(currStr) - len(currStr.rstrip())
+
+				whiteRegL = None
+				whiteRegR = None
+				if sel.begin() == sel.a:
+					beg = sel.a
+					end = sel.b
+				else:
+					beg = sel.b
+					end = sel.a
+
+				whiteRegL = sublime.Region(beg, beg + diffL)
+				whiteRegR = sublime.Region(end - diffL + 2, end)
+
+				self.view.sel().subtract(whiteRegL)
+				self.view.sel().subtract(whiteRegR)
+				# return
+				currStr    	= self.view.substr(sel).strip()
+				print('selsize: ' + str(sel.size))
+				print(currStr)
+
 			tab    	= self.insert_start_line(sel)
+			print ('nSel: ' +  str(nSel))
+
 			if nSel == 1:
-				str    	= self.insert_tab_line(str)
-				str 	= str.replace('\n'+tab, '\n')
-				str    	= pre + '\n\t' + str + '\n' + after
-				str    	= self.normalize_line_endings(str)
-				self.view.run_command('insert_snippet', {"contents": str})
+				currStr    	= self.insert_tab_line(currStr)
+				print ('\n---\n' + currStr)
+				currStr 	= currStr.replace('\n'+tab, '\n')
+				print ('\n---\n' + currStr)
+				currStr    	= pre + '\n\t' + currStr + '\n' + after
+				print ('\n---\n' + currStr)
+				currStr    	= self.normalize_line_endings(currStr)
+				print ('\n---\n' + currStr)
+				self.view.run_command('insert_snippet', {"contents": currStr})
+				# self.view.replace(self.edit, sel, currStr)
 			else:
-				str    	= self.insert_tab_line(str)
-				str 	= preTwo + '\n\t' + tab + str + '\n' + tab + afterTwo
-				str    	= self.normalize_line_endings(str)
-				self.view.replace(self.edit, sel, str)
+				currStr    	= self.insert_tab_line(currStr)
+				currStr 	= preTwo + '\n\t' + tab + currStr + '\n' + tab + afterTwo
+				currStr    	= self.normalize_line_endings(currStr)
+				self.view.replace(self.edit, sel, currStr)
 			sublime.status_message(type + ' added')
 
 	def normalize_line_endings(self, string):
@@ -113,11 +154,11 @@ class SurroundWithCommand(sublime_plugin.TextCommand):
 			else:
 				incSpace += 1
 
-		tabSize = self.view.settings().get("tab_size")
+		tabSize = self.view.settings().get("tab_size") or 2
 		rest 	= incSpace % tabSize
 		nTab	= (incSpace-rest)/tabSize
 		nTab	= math.floor(nTab);
-		
+
 		for x in range(0,(incTab+nTab)):
 			string += '\t'
 		for x in range(0,rest):
